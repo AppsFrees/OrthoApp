@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OrtoApp Pro - Odontología</title>
+    
+    <!-- PWA Manifest e Íconos -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d808d">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3063/3063189.png">
+
+    <style>
+        :root {
+            /* Colores Primitivos */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* Colores Semánticos */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-white);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-secondary: rgba(94, 82, 64, 0.12);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-btn-primary-text: var(--color-cream-50);
+            --color-card-border: rgba(94, 82, 64, 0.12);
+            --color-error: var(--color-red-500);
+            --color-success: var(--color-teal-500);
+            --color-warning: var(--color-orange-500);
+            
+            --color-bg-1: rgba(59, 130, 246, 0.05);
+            --color-bg-3: rgba(34, 197, 94, 0.08);
+            --color-bg-5: rgba(147, 51, 234, 0.05);
+
+            --color-success-rgb: 33, 128, 141;
+            --color-error-rgb: 192, 21, 47;
+            
+            /* Espaciados y Radios */
+            --space-4: 4px; --space-8: 8px; --space-12: 12px;
+            --space-16: 16px; --space-20: 20px; --space-24: 24px;
+            --radius-sm: 6px; --radius-base: 8px; --radius-lg: 12px;
+            --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: rgba(167, 169, 169, 0.7);
+                --color-primary: var(--color-teal-300);
+                --color-border: rgba(119, 124, 124, 0.3);
+                --color-error: var(--color-red-400);
+                --color-success: var(--color-teal-300);
+                --color-warning: var(--color-orange-400);
+                --color-bg-1: rgba(29, 78, 216, 0.1);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family-base); background-color: var(--color-background); color: var(--color-text); line-height: 1.5; }
+
+        .app-container { max-width: 1400px; margin: 0 auto; padding: var(--space-24); }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: var(--space-24); padding: var(--space-20) var(--space-24);
+            background-color: var(--color-surface); border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border);
+        }
+        .header h1 { font-size: 24px; color: var(--color-primary); }
+        .header p { color: var(--color-text-secondary); font-size: 14px; }
+
+        .content-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--space-24); align-items: start; }
+
+        .card {
+            background-color: var(--color-surface); border-radius: var(--radius-lg);
+            border: 1px solid var(--color-card-border); padding: var(--space-24);
+            margin-bottom: var(--space-24);
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-20); }
+        .card h3 { font-size: 18px; font-weight: 600; color: var(--color-text); }
+
+        .patient-row { display: flex; gap: var(--space-16); align-items: flex-end; margin-bottom: var(--space-16); }
+        .patient-row .form-group { flex: 1; margin: 0; }
+        .patient-row .form-group.small { flex: 0 0 100px; }
+
+        .form-group { margin-bottom: var(--space-16); }
+        .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: var(--space-8); }
+        .form-input {
+            width: 100%; padding: var(--space-12); border: 1px solid var(--color-border);
+            border-radius: var(--radius-base); background-color: var(--color-background);
+            color: var(--color-text); font-size: 14px;
+        }
+        .form-input:focus { outline: none; border-color: var(--color-primary); }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Directorio Pacientes */
+        .patients-list {
+            max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border);
+            border-radius: var(--radius-base); background: var(--color-surface);
+            display: none; margin-top: var(--space-8);
+        }
+        .patient-item { padding: var(--space-12); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .patient-item:hover { background-color: var(--color-bg-1); }
+        .patient-info strong { color: var(--color-primary); }
+        .patient-info span { font-size: 12px; color: var(--color-text-secondary); display: block; }
+        .patient-delete { color: var(--color-error); padding: var(--space-4) var(--space-8); cursor: pointer; }
+
+        .backup-row { display: flex; gap: var(--space-8); margin-top: var(--space-12); padding-top: var(--space-12); border-top: 1px dashed var(--color-border); }
+        .backup-row button { flex: 1; font-size: 12px; padding: 8px; }
+
+        /* Odontogram */
+        .arch-section { background: var(--color-bg-1); border-radius: var(--radius-lg); padding: var(--space-20); margin-bottom: var(--space-24); border: 1px solid var(--color-border); }
+        .arch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-16); }
+        .arch-title { font-weight: 600; color: var(--color-primary); font-size: 16px; }
+        .space-input-wrapper { display: flex; align-items: center; gap: var(--space-8); background: var(--color-surface); padding: var(--space-8) var(--space-12); border-radius: var(--radius-base); border: 1px solid var(--color-border); }
+        .space-input-wrapper input { width: 80px; border: none; background: transparent; color: var(--color-text); font-weight: bold; font-size: 16px; text-align: right; outline: none; }
+        
+        .teeth-row { display: flex; align-items: center; justify-content: center; gap: var(--space-8); margin-top: var(--space-16); overflow-x: auto; padding-bottom: var(--space-8); }
+        .midline { width: 3px; height: 70px; background-color: var(--color-primary); opacity: 0.5; border-radius: 2px; margin: 0 var(--space-4); }
+        .tooth-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .tooth-fdi { font-weight: 700; font-size: 14px; color: var(--color-text); }
+        .tooth-desc { font-size: 10px; color: var(--color-text-secondary); text-align: center; }
+        .tooth-col input { width: 50px; text-align: center; padding: var(--space-8) 0; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; border: 1px solid var(--color-border); }
+
+        /* Results Panel */
+        .results-panel { position: sticky; top: var(--space-24); }
+        .result-block { background-color: var(--color-bg-1); border-radius: var(--radius-base); padding: var(--space-16); margin-bottom: var(--space-16); border: 1px solid var(--color-card-border); }
+        .result-header { display: flex; justify-content: space-between; margin-bottom: var(--space-8); }
+        .result-title { font-size: 13px; color: var(--color-text-secondary); font-weight: 500; }
+        .result-value-main { font-size: 24px; font-weight: 700; color: var(--color-text); }
+        .result-value-main.positive { color: var(--color-success); }
+        .result-value-main.negative { color: var(--color-error); }
+        .result-value-main.neutral { color: var(--color-warning); }
+        .discrepancy-bar { width: 100%; height: 8px; background-color: var(--color-secondary); border-radius: 4px; overflow: hidden; margin-top: var(--space-12); }
+        .discrepancy-fill { height: 100%; transition: width 0.3s ease; border-radius: 4px; }
+        .discrepancy-fill.positive { background-color: var(--color-success); }
+        .discrepancy-fill.negative { background-color: var(--color-error); }
+        .discrepancy-fill.neutral { background-color: var(--color-warning); }
+
+        .recommendation { padding: var(--space-16); background-color: var(--color-bg-3); border-radius: var(--radius-base); border-left: 4px solid var(--color-primary); margin-bottom: var(--space-16); }
+        .recommendation-title { font-size: 13px; font-weight: 600; margin-bottom: var(--space-4); }
+        .recommendation-text { font-size: 14px; color: var(--color-text-secondary); }
+
+        .bolton-badge { background: var(--color-bg-5); color: var(--color-primary); padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .bolton-molars-row { display: flex; justify-content: center; gap: var(--space-16); margin-top: var(--space-16); }
+        .molar-group { display: flex; gap: var(--space-16); background: var(--color-surface); padding: var(--space-12); border-radius: var(--radius-base); border: 1px solid var(--color-border); }
+        .bolton-result-item { padding: var(--space-12); background-color: var(--color-surface); border-radius: var(--radius-base); border: 1px solid var(--color-border); margin-bottom: var(--space-12); }
+        .bolton-result-item.in-range { background-color: rgba(var(--color-success-rgb), 0.1); border-color: var(--color-success); }
+        .bolton-result-item.out-range { background-color: rgba(var(--color-error-rgb), 0.1); border-color: var(--color-error); }
+        .bolton-value { font-size: 20px; font-weight: 700; margin: 4px 0; }
+
+        .btn { padding: var(--space-12) var(--space-20); font-size: 14px; font-weight: 600; border: none; border-radius: var(--radius-base); cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-8); }
+        .btn-primary { background-color: var(--color-primary); color: var(--color-btn-primary-text); }
+        .btn-primary:hover { background-color: var(--color-primary-hover); }
+        .btn-primary-full { width: 100%; margin-top: var(--space-16); }
+        .btn-secondary { background-color: var(--color-secondary); color: var(--color-text); }
+        .btn-danger { background-color: rgba(var(--color-error-rgb), 0.1); color: var(--color-error); border: 1px solid rgba(var(--color-error-rgb), 0.3); }
+
+        .print-only { display: none; }
+
+        @media (max-width: 992px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .results-panel { position: relative; top: 0; }
+            .bolton-molars-row { flex-direction: column; }
+        }
+
+        /* --- ESTILOS PARA IMPRESIÓN --- */
+        @media print {
+            body { background-color: white; color: black; font-size: 12pt; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .print-container { padding: 20px; max-width: 800px; margin: 0 auto; }
+            .print-header { text-align: center; border-bottom: 2px solid var(--color-primary); padding-bottom: 15px; margin-bottom: 20px; }
+            .print-header h1 { color: var(--color-primary); font-size: 24px; margin: 0; }
+            .print-patient-box { display: flex; justify-content: space-between; background: var(--color-bg-1); padding: 15px; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 20px; }
+            .print-section { margin-bottom: 25px; page-break-inside: avoid; }
+            .print-section h2 { font-size: 16px; color: var(--color-primary); border-bottom: 1px solid var(--color-border); padding-bottom: 5px; margin-bottom: 15px; }
+            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; text-align: center; font-size: 12px; }
+            .print-table th, .print-table td { border: 1px solid var(--color-border); padding: 8px; }
+            .print-table th { background-color: var(--color-bg-3); font-weight: 600; }
+            .print-table td.midline-cell { border-right: 3px solid var(--color-primary); }
+            .print-results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+            .print-card { border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; }
+            .print-val-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed var(--color-border); padding-bottom: 4px; }
+            .print-val-row.bold { font-weight: bold; font-size: 16px; border-bottom: none; }
+            .text-error { color: var(--color-error); font-weight: bold; }
+            .text-success { color: var(--color-success); font-weight: bold; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- === VISTA DE IMPRESIÓN (OCULTA EN PANTALLA) === -->
+    <div class="print-container print-only">
+        <div class="print-header">
+            <h1>OrtoApp Clínico</h1>
+            <p>Reporte Detallado de Discrepancia Dentaria y Análisis de Bolton</p>
+        </div>
+        <div class="print-patient-box">
+            <p><strong>Paciente:</strong> <span id="pr-name">-</span></p>
+            <p><strong>Edad:</strong> <span id="pr-age">-</span></p>
+            <p><strong>Fecha:</strong> <span id="pr-date">-</span></p>
+        </div>
+        <div class="print-section">
+            <h2>1. Odontograma (Ancho en mm)</h2>
+            <table class="print-table">
+                <tr><th colspan="5" class="midline-cell">Superior Derecho</th><th colspan="5">Superior Izquierdo</th></tr>
+                <tr><td>15</td><td>14</td><td>13</td><td>12</td><td class="midline-cell">11</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+                <tr><td id="pr-sup-1">-</td><td id="pr-sup-2">-</td><td id="pr-sup-3">-</td><td id="pr-sup-4">-</td><td class="midline-cell" id="pr-sup-5">-</td><td id="pr-sup-6">-</td><td id="pr-sup-7">-</td><td id="pr-sup-8">-</td><td id="pr-sup-9">-</td><td id="pr-sup-10">-</td></tr>
+            </table>
+            <table class="print-table">
+                <tr><th colspan="5" class="midline-cell">Inferior Derecho</th><th colspan="5">Inferior Izquierdo</th></tr>
+                <tr><td>45</td><td>44</td><td>43</td><td>42</td><td class="midline-cell">41</td><td>31</td><td>32</td><td>33</td><td>34</td><td>35</td></tr>
+                <tr><td id="pr-inf-1">-</td><td id="pr-inf-2">-</td><td id="pr-inf-3">-</td><td id="pr-inf-4">-</td><td class="midline-cell" id="pr-inf-5">-</td><td id="pr-inf-6">-</td><td id="pr-inf-7">-</td><td id="pr-inf-8">-</td><td id="pr-inf-9">-</td><td id="pr-inf-10">-</td></tr>
+            </table>
+            <table class="print-table" style="width: 60%; margin: 0 auto;">
+                <tr><th colspan="4">Molares (Bolton)</th></tr>
+                <tr><td>16: <strong id="pr-mol-sd">-</strong></td><td>26: <strong id="pr-mol-si">-</strong></td><td>46: <strong id="pr-mol-id">-</strong></td><td>36: <strong id="pr-mol-ii">-</strong></td></tr>
+            </table>
+        </div>
+        <div class="print-section print-results-grid">
+            <div class="print-card">
+                <h2>2. Análisis de Espacio</h2>
+                <div class="print-val-row"><span>Maxilar Disp:</span> <span id="pr-disp-sup">-</span></div>
+                <div class="print-val-row"><span>Maxilar Req:</span> <span id="pr-req-sup">-</span></div>
+                <div class="print-val-row bold"><span>Disc. Maxilar:</span> <span id="pr-disc-sup">-</span></div>
+                <br>
+                <div class="print-val-row"><span>Mandíbula Disp:</span> <span id="pr-disp-inf">-</span></div>
+                <div class="print-val-row"><span>Mandíbula Req:</span> <span id="pr-req-inf">-</span></div>
+                <div class="print-val-row bold"><span>Disc. Mandíbula:</span> <span id="pr-disc-inf">-</span></div>
+            </div>
+            <div class="print-card">
+                <h2>3. Análisis de Bolton</h2>
+                <div class="print-val-row"><span>Índice Anterior:</span> <strong id="pr-bolton-ant-val">-</strong></div>
+                <div id="pr-bolton-ant-diag" style="font-size: 13px; margin-bottom: 10px;">-</div>
+                <div class="print-val-row"><span>Índice Total:</span> <strong id="pr-bolton-tot-val">-</strong></div>
+                <div id="pr-bolton-tot-diag" style="font-size: 13px;">-</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === VISTA DE LA APLICACIÓN (INTERFAZ WEB) === -->
+    <div class="app-container no-print">
+        
+        <div class="header">
+            <div>
+                <h1>OrtoApp Clínico</h1>
+                <p>Cálculo Integral de Discrepancia Dentaria y Análisis de Bolton</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="loadPermanentExample()">Ejemplo</button>
+                <button class="btn btn-danger" onclick="clearAllData()">Limpiar Todo</button>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            
+            <div class="inputs-col">
+                <!-- Gestión de Paciente -->
+                <div class="card" style="background-color: var(--color-bg-3); border-color: var(--color-primary);">
+                    <h3 style="margin-bottom: 16px; color: var(--color-primary);">Gestión de Paciente (Base de Datos Local)</h3>
+                    <div class="patient-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre del Paciente</label>
+                            <input type="text" class="form-input" id="patient-name" placeholder="Ej. Juan Pérez">
+                        </div>
+                        <div class="form-group small">
+                            <label class="form-label">Edad</label>
+                            <input type="number" class="form-input" id="patient-age" placeholder="Años">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="savePatientToLocal()">💾 Guardar / Actualizar Paciente</button>
+                    
+                    <hr style="border:none; border-top: 1px solid var(--color-border); margin: var(--space-20) 0;">
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Buscar y Cargar Paciente</label>
+                        <input type="text" class="form-input" id="search-patient" placeholder="🔍 Buscar por nombre..." oninput="filterPatients()">
+                        <div id="patients-list" class="patients-list"></div>
+                    </div>
+                    <div class="backup-row">
+                        <button class="btn btn-secondary" onclick="exportDatabase()">⬇️ Exportar Backup</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">⬆️ Importar Backup</button>
+                        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importDatabase(event)">
+                    </div>
+                </div>
+
+                <!-- Odontograma Superior -->
+                <div class="card" style="padding: 0; background: transparent; border: none;">
+                    <div class="arch-section">
+                        <div class="arch-header">
+                            <span class="arch-title">Arcada Superior</span>
+                            <div class="space-input-wrapper">
+                                <span>Espacio Disp:</span>
+                                <input type="number" id="perm-espacio-sup" step="0.1" placeholder="0.0" oninput="calculatePermanent()">
+                                <span>mm</span>
+                            </div>
+                        </div>
+                        <div class="teeth-row">
+                            <div class="tooth-col"><span class="tooth-fdi">15</span><input type="number" id="tooth-sup-1" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">14</span><input type="number" id="tooth-sup-2" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">13</span><input type="number" id="tooth-sup-3" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">12</span><input type="number" id="tooth-sup-4" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">11</span><input type="number" id="tooth-sup-5" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="midline"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">21</span><input type="number" id="tooth-sup-6" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">22</span><input type="number" id="tooth-sup-7" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">23</span><input type="number" id="tooth-sup-8" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">24</span><input type="number" id="tooth-sup-9" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">25</span><input type="number" id="tooth-sup-10" step="0.1" oninput="calculatePermanent()"></div>
+                        </div>
+                    </div>
+
+                    <!-- Odontograma Inferior -->
+                    <div class="arch-section">
+                        <div class="arch-header">
+                            <span class="arch-title">Arcada Inferior</span>
+                            <div class="space-input-wrapper">
+                                <span>Espacio Disp:</span>
+                                <input type="number" id="perm-espacio-inf" step="0.1" placeholder="0.0" oninput="calculatePermanent()">
+                                <span>mm</span>
+                            </div>
+                        </div>
+                        <div class="teeth-row">
+                            <div class="tooth-col"><span class="tooth-fdi">45</span><input type="number" id="tooth-inf-1" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">44</span><input type="number" id="tooth-inf-2" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">43</span><input type="number" id="tooth-inf-3" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">42</span><input type="number" id="tooth-inf-4" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">41</span><input type="number" id="tooth-inf-5" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="midline"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">31</span><input type="number" id="tooth-inf-6" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">32</span><input type="number" id="tooth-inf-7" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">33</span><input type="number" id="tooth-inf-8" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">34</span><input type="number" id="tooth-inf-9" step="0.1" oninput="calculatePermanent()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">35</span><input type="number" id="tooth-inf-10" step="0.1" oninput="calculatePermanent()"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bolton Molares -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Análisis de Bolton (Molares)</h3>
+                        <span class="bolton-badge">⚡ Auto-Calculado</span>
+                    </div>
+                    <div class="bolton-molars-row">
+                        <div class="molar-group">
+                            <div class="tooth-col"><span class="tooth-fdi">16</span><input type="number" id="bolton-mol-sup-der" step="0.1" oninput="calculateBoltonAuto()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">26</span><input type="number" id="bolton-mol-sup-izq" step="0.1" oninput="calculateBoltonAuto()"></div>
+                        </div>
+                        <div class="molar-group">
+                            <div class="tooth-col"><span class="tooth-fdi">46</span><input type="number" id="bolton-mol-inf-der" step="0.1" oninput="calculateBoltonAuto()"></div>
+                            <div class="tooth-col"><span class="tooth-fdi">36</span><input type="number" id="bolton-mol-inf-izq" step="0.1" oninput="calculateBoltonAuto()"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="bolton-ant-sup"><input type="hidden" id="bolton-ant-inf">
+                </div>
+            </div>
+
+            <!-- Columna Resultados -->
+            <div class="results-col">
+                <div class="card results-panel">
+                    <h3 style="margin-bottom: var(--space-20);">Resumen de Resultados</h3>
+
+                    <div class="result-block">
+                        <div class="result-header">
+                            <span class="result-title">Discrepancia Superior</span>
+                            <span class="result-title" style="font-size: 11px;">Req: <span id="perm-required-sup">0.00 mm</span></span>
+                        </div>
+                        <div class="result-value-main" id="perm-discrepancy-sup">0.00 mm</div>
+                        <div class="discrepancy-bar"><div class="discrepancy-fill" id="perm-bar-sup" style="width: 0%"></div></div>
+                    </div>
+
+                    <div class="result-block">
+                        <div class="result-header">
+                            <span class="result-title">Discrepancia Inferior</span>
+                            <span class="result-title" style="font-size: 11px;">Req: <span id="perm-required-inf">0.00 mm</span></span>
+                        </div>
+                        <div class="result-value-main" id="perm-discrepancy-inf">0.00 mm</div>
+                        <div class="discrepancy-bar"><div class="discrepancy-fill" id="perm-bar-inf" style="width: 0%"></div></div>
+                    </div>
+
+                    <hr style="border:none; border-top: 1px solid var(--color-border); margin: var(--space-20) 0;">
+
+                    <h3 style="margin-bottom: var(--space-12); font-size: 16px;">Análisis de Bolton</h3>
+                    <div class="bolton-result-item" id="bolton-ant-result">
+                        <div class="result-title">ÍNDICE ANTERIOR</div>
+                        <div class="bolton-value" id="bolton-ant-value">-- %</div>
+                        <div id="bolton-ant-analysis" style="font-size: 13px; margin-top: 8px;">Faltan datos.</div>
+                    </div>
+
+                    <div class="bolton-result-item" id="bolton-total-result">
+                        <div class="result-title">ÍNDICE TOTAL</div>
+                        <div class="bolton-value" id="bolton-total-value">-- %</div>
+                        <div id="bolton-total-analysis" style="font-size: 13px; margin-top: 8px;">Faltan datos.</div>
+                    </div>
+
+                    <button class="btn btn-primary btn-primary-full" onclick="prepareAndPrintReport()">🖨️ Imprimir Reporte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === PWA SERVICE WORKER ===
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('SW registrado'))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+
+        // === BASE DE DATOS LOCAL ===
+        const STORAGE_KEY = 'ortoAppPatientsDB';
+        let currentPatientId = null;
+        window.onload = () => { renderPatientsList(); };
+
+        function savePatientToLocal() {
+            const name = document.getElementById('patient-name').value.trim();
+            const age = document.getElementById('patient-age').value.trim();
+            if (!name) { alert("Ingrese el nombre del paciente."); return; }
+
+            const patientData = {
+                id: currentPatientId || Date.now().toString(),
+                name: name, age: age, date: new Date().toLocaleDateString(),
+                teethSup: [], teethInf: [],
+                spaceSup: document.getElementById('perm-espacio-sup').value,
+                spaceInf: document.getElementById('perm-espacio-inf').value,
+                molars: {
+                    supD: document.getElementById('bolton-mol-sup-der').value,
+                    supI: document.getElementById('bolton-mol-sup-izq').value,
+                    infD: document.getElementById('bolton-mol-inf-der').value,
+                    infI: document.getElementById('bolton-mol-inf-izq').value
+                }
+            };
+            for (let i = 1; i <= 10; i++) {
+                patientData.teethSup.push(document.getElementById('tooth-sup-' + i).value);
+                patientData.teethInf.push(document.getElementById('tooth-inf-' + i).value);
+            }
+
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const index = db.findIndex(p => p.id === patientData.id);
+            if (index >= 0) db[index] = patientData; else { db.push(patientData); currentPatientId = patientData.id; }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+            renderPatientsList();
+            alert("Paciente guardado correctamente.");
+        }
+
+        function renderPatientsList(filter = '') {
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const listEl = document.getElementById('patients-list');
+            listEl.innerHTML = '';
+            const filtered = db.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()));
+            listEl.style.display = (filtered.length > 0 || filter) ? 'block' : 'none';
+            filtered.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'patient-item';
+                div.innerHTML = `<div class="patient-info" onclick="loadPatient('${p.id}')"><strong>${p.name}</strong> <span>${p.date}</span></div>
+                                 <div class="patient-delete" onclick="deletePatient('${p.id}', event)">🗑️</div>`;
+                listEl.appendChild(div);
+            });
+        }
+        function filterPatients() { renderPatientsList(document.getElementById('search-patient').value); }
+        function loadPatient(id) {
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const p = db.find(x => x.id === id);
+            if (p) {
+                currentPatientId = p.id; document.getElementById('patient-name').value = p.name || ''; document.getElementById('patient-age').value = p.age || '';
+                document.getElementById('perm-espacio-sup').value = p.spaceSup || ''; document.getElementById('perm-espacio-inf').value = p.spaceInf || '';
+                for (let i=1; i<=10; i++) { document.getElementById('tooth-sup-'+i).value = p.teethSup[i-1] || ''; document.getElementById('tooth-inf-'+i).value = p.teethInf[i-1] || ''; }
+                document.getElementById('bolton-mol-sup-der').value = p.molars.supD || ''; document.getElementById('bolton-mol-sup-izq').value = p.molars.supI || '';
+                document.getElementById('bolton-mol-inf-der').value = p.molars.infD || ''; document.getElementById('bolton-mol-inf-izq').value = p.molars.infI || '';
+                calculatePermanent(); document.getElementById('search-patient').value = ''; document.getElementById('patients-list').style.display = 'none';
+            }
+        }
+        function deletePatient(id, e) {
+            e.stopPropagation();
+            if(confirm("¿Eliminar paciente?")) {
+                let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(db.filter(p => p.id !== id)));
+                if(currentPatientId === id) currentPatientId = null;
+                renderPatientsList(document.getElementById('search-patient').value);
+            }
+        }
+
+        // === IMPORTAR/EXPORTAR ===
+        function exportDatabase() {
+            const dbText = localStorage.getItem(STORAGE_KEY) || '[]';
+            const blob = new Blob([dbText], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `OrtoApp_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+        function importDatabase(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                    const currentIds = new Set(db.map(p => p.id));
+                    importedData.forEach(p => { if (p.id && !currentIds.has(p.id)) db.push(p); });
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                    renderPatientsList(); alert("Backup importado con éxito.");
+                } catch(err) { alert("Error de archivo."); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // === IMPRESIÓN ===
+        function prepareAndPrintReport() {
+            document.getElementById('pr-name').innerText = document.getElementById('patient-name').value || '--';
+            document.getElementById('pr-age').innerText = document.getElementById('patient-age').value || '--';
+            document.getElementById('pr-date').innerText = new Date().toLocaleDateString();
+            
+            for(let i=1;i<=10;i++){
+                document.getElementById('pr-sup-'+i).innerText = document.getElementById('tooth-sup-'+i).value || '-';
+                document.getElementById('pr-inf-'+i).innerText = document.getElementById('tooth-inf-'+i).value || '-';
+            }
+            document.getElementById('pr-mol-sd').innerText = document.getElementById('bolton-mol-sup-der').value || '-';
+            document.getElementById('pr-mol-si').innerText = document.getElementById('bolton-mol-sup-izq').value || '-';
+            document.getElementById('pr-mol-id').innerText = document.getElementById('bolton-mol-inf-der').value || '-';
+            document.getElementById('pr-mol-ii').innerText = document.getElementById('bolton-mol-inf-izq').value || '-';
+
+            document.getElementById('pr-disp-sup').innerText = document.getElementById('perm-espacio-sup').value ? document.getElementById('perm-espacio-sup').value+' mm' : '-';
+            document.getElementById('pr-req-sup').innerText = document.getElementById('perm-required-sup').innerText;
+            const dS = document.getElementById('perm-discrepancy-sup').innerText;
+            document.getElementById('pr-disc-sup').innerText = dS;
+            document.getElementById('pr-disc-sup').className = dS.includes('-') ? 'text-error' : 'text-success';
+
+            document.getElementById('pr-disp-inf').innerText = document.getElementById('perm-espacio-inf').value ? document.getElementById('perm-espacio-inf').value+' mm' : '-';
+            document.getElementById('pr-req-inf').innerText = document.getElementById('perm-required-inf').innerText;
+            const dI = document.getElementById('perm-discrepancy-inf').innerText;
+            document.getElementById('pr-disc-inf').innerText = dI;
+            document.getElementById('pr-disc-inf').className = dI.includes('-') ? 'text-error' : 'text-success';
+
+            document.getElementById('pr-bolton-ant-val').innerText = document.getElementById('bolton-ant-value').innerText;
+            document.getElementById('pr-bolton-ant-diag').innerHTML = document.getElementById('bolton-ant-analysis').innerHTML;
+            document.getElementById('pr-bolton-tot-val').innerText = document.getElementById('bolton-total-value').innerText;
+            document.getElementById('pr-bolton-tot-diag').innerHTML = document.getElementById('bolton-total-analysis').innerHTML;
+
+            window.print();
+        }
+
+        // === CÁLCULOS ===
+        function calculatePermanent() {
+            autoCalculateAnteriorSums(); calculateBoltonAuto();
+            let reqSup = 0, cSup = 0, reqInf = 0, cInf = 0;
+            for(let i=1;i<=10;i++){
+                let vS = parseFloat(document.getElementById('tooth-sup-'+i).value), vI = parseFloat(document.getElementById('tooth-inf-'+i).value);
+                if(!isNaN(vS)){ reqSup += vS; cSup++; }
+                if(!isNaN(vI)){ reqInf += vI; cInf++; }
+            }
+            updateArchResult('sup', reqSup, parseFloat(document.getElementById('perm-espacio-sup').value), cSup);
+            updateArchResult('inf', reqInf, parseFloat(document.getElementById('perm-espacio-inf').value), cInf);
+        }
+
+        function updateArchResult(arch, req, disp, count) {
+            const rE = document.getElementById(`perm-required-${arch}`), dE = document.getElementById(`perm-discrepancy-${arch}`), bE = document.getElementById(`perm-bar-${arch}`);
+            if(count>0 && !isNaN(disp)){
+                let disc = disp - req;
+                rE.textContent = req.toFixed(2)+' mm'; dE.textContent = (disc>0?'+':'')+disc.toFixed(2)+' mm';
+                dE.className = 'result-value-main '+(disc>=2?'positive':(disc<=-2?'negative':'neutral'));
+                bE.className = 'discrepancy-fill '+(disc>=2?'positive':(disc<=-2?'negative':'neutral'));
+                bE.style.width = Math.min((Math.abs(disc)/10)*100, 100)+'%';
+            } else { rE.textContent='0.00 mm'; dE.textContent='0.00 mm'; dE.className='result-value-main'; bE.style.width='0%'; }
+        }
+
+        function autoCalculateAnteriorSums() {
+            let sS = 0, cS = 0, sI = 0, cI = 0;
+            for (let i=3; i<=8; i++) {
+                let vS = parseFloat(document.getElementById('tooth-sup-'+i).value), vI = parseFloat(document.getElementById('tooth-inf-'+i).value);
+                if(!isNaN(vS)){ sS += vS; cS++; }
+                if(!isNaN(vI)){ sI += vI; cI++; }
+            }
+            document.getElementById('bolton-ant-sup').value = cS===6?sS:''; document.getElementById('bolton-ant-inf').value = cI===6?sI:'';
+        }
+
+        function calculateBoltonAuto() {
+            const aS=parseFloat(document.getElementById('bolton-ant-sup').value), aI=parseFloat(document.getElementById('bolton-ant-inf').value);
+            const mSD=parseFloat(document.getElementById('bolton-mol-sup-der').value), mSI=parseFloat(document.getElementById('bolton-mol-sup-izq').value);
+            const mID=parseFloat(document.getElementById('bolton-mol-inf-der').value), mII=parseFloat(document.getElementById('bolton-mol-inf-izq').value);
+            
+            const aE=document.getElementById('bolton-ant-value'), aA=document.getElementById('bolton-ant-analysis'), aB=document.getElementById('bolton-ant-result');
+            if(aS>0 && aI>0){
+                let val = (aI/aS)*100, ok = val>=75.7 && val<=78.7;
+                aE.textContent = val.toFixed(2)+'%'; aB.className = 'bolton-result-item '+(ok?'in-range':'out-range');
+                if(ok) { aA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
+                else { aA.innerHTML = '<strong style="color:var(--color-error)">⚠️ Exceso '+(val>78.7?'Mandibular':'Maxilar')+': '+Math.abs(val>78.7 ? aI-(aS*0.772) : aS-(aI/0.772)).toFixed(2)+' mm</strong>'; }
+            } else { aE.textContent='-- %'; aA.innerHTML='Faltan incisivos/caninos.'; aB.className='bolton-result-item'; }
+
+            const tE=document.getElementById('bolton-total-value'), tA=document.getElementById('bolton-total-analysis'), tB=document.getElementById('bolton-total-result');
+            if(aS>0 && aI>0 && mSD>0 && mSI>0 && mID>0 && mII>0){
+                let pS=0, pI=0; for(let i of [1,2,9,10]){ pS+=parseFloat(document.getElementById('tooth-sup-'+i).value)||0; pI+=parseFloat(document.getElementById('tooth-inf-'+i).value)||0; }
+                let totS = aS+pS+mSD+mSI, totI = aI+pI+mID+mII;
+                let val = (totI/totS)*100, ok = val>=89.4 && val<=93.2;
+                tE.textContent = val.toFixed(2)+'%'; tB.className = 'bolton-result-item '+(ok?'in-range':'out-range');
+                if(ok) { tA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
+                else { tA.innerHTML = '<strong style="color:var(--color-error)">⚠️ Exceso '+(val>93.2?'Mandibular':'Maxilar')+': '+Math.abs(val>93.2 ? totI-(totS*0.913) : totS-(totI/0.913)).toFixed(2)+' mm</strong>'; }
+            } else { tE.textContent='-- %'; tA.innerHTML='Faltan molares/premolares.'; tB.className='bolton-result-item'; }
+        }
+
+        function clearAllData() { if(confirm('¿Limpiar pantalla?')) { currentPatientId=null; document.querySelectorAll('input').forEach(i=>i.value=''); calculatePermanent(); } }
+        function loadPermanentExample() {
+            document.getElementById('patient-name').value="Ejemplo";
+            let vS=[7, 7.2, 7.8, 6.5, 8.5, 8.5, 6.5, 7.8, 7.2, 7], vI=[6.8, 7, 6.5, 5.8, 5.2, 5.2, 5.8, 6.5, 7, 6.8];
+            for(let i=1;i<=10;i++){ document.getElementById('tooth-sup-'+i).value=vS[i-1]; document.getElementById('tooth-inf-'+i).value=vI[i-1]; }
+            document.getElementById('perm-espacio-sup').value='74'; document.getElementById('perm-espacio-inf').value='64';
+            document.getElementById('bolton-mol-sup-der').value='10.5'; document.getElementById('bolton-mol-sup-izq').value='10.5';
+            document.getElementById('bolton-mol-inf-der').value='11'; document.getElementById('bolton-mol-inf-izq').value='11';
+            calculatePermanent();
+        }
+    </script>
+</body>
+</html>
