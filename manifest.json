@@ -1,0 +1,17 @@
+{
+  "name": "OrtoApp Pro Clínico",
+  "short_name": "OrtoApp",
+  "description": "Herramienta odontológica para cálculo de discrepancia y Bolton.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fcfcf9",
+  "theme_color": "#21808d",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063189.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
