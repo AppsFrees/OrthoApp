@@ -114,6 +114,8 @@
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
+        .patient-actions { display: flex; gap: var(--space-8); margin-bottom: var(--space-16); }
+        
         /* Directorio Pacientes */
         .patients-list {
             max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border);
@@ -205,6 +207,11 @@
             .print-card { border: 1px solid var(--color-border); border-radius: 8px; padding: 15px; }
             .print-val-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed var(--color-border); padding-bottom: 4px; }
             .print-val-row.bold { font-weight: bold; font-size: 16px; border-bottom: none; }
+            
+            .print-recommendation { background-color: var(--color-bg-1); border-left: 4px solid var(--color-primary); padding: 15px; border-radius: 8px; margin-top: 20px; }
+            .print-recommendation h4 { margin: 0 0 5px 0; font-size: 14px; }
+            .print-recommendation p { margin: 0; font-size: 13px; }
+
             .text-error { color: var(--color-error); font-weight: bold; }
             .text-success { color: var(--color-success); font-weight: bold; }
         }
@@ -259,6 +266,16 @@
                 <div id="pr-bolton-tot-diag" style="font-size: 13px;">-</div>
             </div>
         </div>
+
+        <div class="print-section">
+            <h2>4. Conclusiones Clínicas Sugeridas</h2>
+            <div class="print-recommendation">
+                <h4>Relación Espacial (Discrepancia)</h4>
+                <p id="pr-rec-espacial" style="margin-bottom: 10px;">-</p>
+                <h4>Relación de Masa Dental (Bolton)</h4>
+                <p id="pr-rec-bolton">-</p>
+            </div>
+        </div>
     </div>
 
     <!-- === VISTA DE LA APLICACIÓN (INTERFAZ WEB) === -->
@@ -271,7 +288,6 @@
             </div>
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-secondary" onclick="loadPermanentExample()">Ejemplo</button>
-                <button class="btn btn-danger" onclick="clearAllData()">Limpiar Todo</button>
             </div>
         </div>
 
@@ -280,7 +296,14 @@
             <div class="inputs-col">
                 <!-- Gestión de Paciente -->
                 <div class="card" style="background-color: var(--color-bg-3); border-color: var(--color-primary);">
-                    <h3 style="margin-bottom: 16px; color: var(--color-primary);">Gestión de Paciente (Base de Datos Local)</h3>
+                    <h3 style="margin-bottom: 16px; color: var(--color-primary);">Gestión de Paciente</h3>
+                    
+                    <!-- BOTONES AÑADIDOS/CORREGIDOS PARA EVITAR SOBREESCRIBIR -->
+                    <div class="patient-actions">
+                        <button class="btn btn-primary" style="flex: 2;" onclick="savePatientToLocal()">💾 Guardar Cambios</button>
+                        <button class="btn btn-secondary" style="flex: 1;" onclick="nuevoPaciente()">➕ Nuevo</button>
+                    </div>
+
                     <div class="patient-row">
                         <div class="form-group">
                             <label class="form-label">Nombre del Paciente</label>
@@ -291,7 +314,6 @@
                             <input type="number" class="form-input" id="patient-age" placeholder="Años">
                         </div>
                     </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="savePatientToLocal()">💾 Guardar / Actualizar Paciente</button>
                     
                     <hr style="border:none; border-top: 1px solid var(--color-border); margin: var(--space-20) 0;">
                     
@@ -402,6 +424,12 @@
                         <div class="discrepancy-bar"><div class="discrepancy-fill" id="perm-bar-inf" style="width: 0%"></div></div>
                     </div>
 
+                    <!-- Recomendación General de Espacio -->
+                    <div class="recommendation">
+                        <div class="recommendation-title">Recomendación Clínica Espacial</div>
+                        <div class="recommendation-text" id="perm-recommendation">Ingrese los datos para ver la recomendación.</div>
+                    </div>
+
                     <hr style="border:none; border-top: 1px solid var(--color-border); margin: var(--space-20) 0;">
 
                     <h3 style="margin-bottom: var(--space-12); font-size: 16px;">Análisis de Bolton</h3>
@@ -415,6 +443,12 @@
                         <div class="result-title">ÍNDICE TOTAL</div>
                         <div class="bolton-value" id="bolton-total-value">-- %</div>
                         <div id="bolton-total-analysis" style="font-size: 13px; margin-top: 8px;">Faltan datos.</div>
+                    </div>
+
+                    <!-- RESUMEN CLÍNICO BOLTON RESTAURADO -->
+                    <div class="recommendation" id="bolton-clinical-summary" style="display: none; background-color: rgba(33, 128, 141, 0.1); border-color: var(--color-primary);">
+                        <div class="recommendation-title">Resumen Bolton</div>
+                        <div class="recommendation-text" id="bolton-summary-text" style="font-size: 13px;"></div>
                     </div>
 
                     <button class="btn btn-primary btn-primary-full" onclick="prepareAndPrintReport()">🖨️ Imprimir Reporte</button>
@@ -437,6 +471,29 @@
         const STORAGE_KEY = 'ortoAppPatientsDB';
         let currentPatientId = null;
         window.onload = () => { renderPatientsList(); };
+
+        // Función corregida: Limpia pantalla y genera ID nuevo
+        function nuevoPaciente() {
+            if(confirm("¿Comenzar un nuevo paciente? Esto limpiará la pantalla actual.")) {
+                currentPatientId = null; 
+                document.getElementById('patient-name').value = '';
+                document.getElementById('patient-age').value = '';
+                document.getElementById('perm-espacio-sup').value = '';
+                document.getElementById('perm-espacio-inf').value = '';
+                for (let i = 1; i <= 10; i++) {
+                    document.getElementById('tooth-sup-' + i).value = '';
+                    document.getElementById('tooth-inf-' + i).value = '';
+                }
+                document.getElementById('bolton-mol-sup-der').value = '';
+                document.getElementById('bolton-mol-sup-izq').value = '';
+                document.getElementById('bolton-mol-inf-der').value = '';
+                document.getElementById('bolton-mol-inf-izq').value = '';
+                
+                calculatePermanent(); 
+                document.getElementById('search-patient').value = '';
+                document.getElementById('patients-list').style.display = 'none';
+            }
+        }
 
         function savePatientToLocal() {
             const name = document.getElementById('patient-name').value.trim();
@@ -466,7 +523,13 @@
             if (index >= 0) db[index] = patientData; else { db.push(patientData); currentPatientId = patientData.id; }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
             renderPatientsList();
-            alert("Paciente guardado correctamente.");
+            
+            // Feedback visual temporal
+            const btn = document.querySelector('button[onclick="savePatientToLocal()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✅ ¡Guardado!";
+            btn.style.backgroundColor = "var(--color-success)";
+            setTimeout(() => { btn.innerHTML = originalText; btn.style.backgroundColor = "var(--color-primary)"; }, 2000);
         }
 
         function renderPatientsList(filter = '') {
@@ -565,6 +628,9 @@
             document.getElementById('pr-bolton-tot-val').innerText = document.getElementById('bolton-total-value').innerText;
             document.getElementById('pr-bolton-tot-diag').innerHTML = document.getElementById('bolton-total-analysis').innerHTML;
 
+            document.getElementById('pr-rec-espacial').innerText = document.getElementById('perm-recommendation').innerText;
+            document.getElementById('pr-rec-bolton').innerText = document.getElementById('bolton-summary-text').innerText || 'Faltan datos para conclusión de Bolton.';
+
             window.print();
         }
 
@@ -579,6 +645,12 @@
             }
             updateArchResult('sup', reqSup, parseFloat(document.getElementById('perm-espacio-sup').value), cSup);
             updateArchResult('inf', reqInf, parseFloat(document.getElementById('perm-espacio-inf').value), cInf);
+            
+            if (cSup > 0 && !isNaN(parseFloat(document.getElementById('perm-espacio-sup').value)) && cInf > 0 && !isNaN(parseFloat(document.getElementById('perm-espacio-inf').value))) {
+                updateRecommendationBoth(parseFloat(document.getElementById('perm-espacio-sup').value) - reqSup, parseFloat(document.getElementById('perm-espacio-inf').value) - reqInf);
+            } else {
+                document.getElementById('perm-recommendation').textContent = 'Ingrese espacios y anchos para ver la recomendación.';
+            }
         }
 
         function updateArchResult(arch, req, disp, count) {
@@ -590,6 +662,16 @@
                 bE.className = 'discrepancy-fill '+(disc>=2?'positive':(disc<=-2?'negative':'neutral'));
                 bE.style.width = Math.min((Math.abs(disc)/10)*100, 100)+'%';
             } else { rE.textContent='0.00 mm'; dE.textContent='0.00 mm'; dE.className='result-value-main'; bE.style.width='0%'; }
+        }
+
+        function updateRecommendationBoth(discSup, discInf) {
+            let text = '';
+            if (discSup >= 2 && discInf >= 2) text = 'Ambas arcadas presentan diastemas significativos.';
+            else if (discSup <= -4 || discInf <= -4) text = 'Apiñamiento severo. Requiere planificación ortodóncica integral (posibles extracciones).';
+            else if (discSup <= -2 && discInf <= -2) text = 'Ambas arcadas presentan apiñamiento leve a moderado.';
+            else if (Math.abs(discSup) < 2 && Math.abs(discInf) < 2) text = 'Relación espacial óptima en ambas arcadas.';
+            else text = 'Discrepancias mixtas. Evaluar mecánicas de compensación.';
+            document.getElementById('perm-recommendation').textContent = text;
         }
 
         function autoCalculateAnteriorSums() {
@@ -608,10 +690,12 @@
             const mID=parseFloat(document.getElementById('bolton-mol-inf-der').value), mII=parseFloat(document.getElementById('bolton-mol-inf-izq').value);
             
             const aE=document.getElementById('bolton-ant-value'), aA=document.getElementById('bolton-ant-analysis'), aB=document.getElementById('bolton-ant-result');
+            let antInRange = false; let totInRange = false;
+            
             if(aS>0 && aI>0){
-                let val = (aI/aS)*100, ok = val>=75.7 && val<=78.7;
-                aE.textContent = val.toFixed(2)+'%'; aB.className = 'bolton-result-item '+(ok?'in-range':'out-range');
-                if(ok) { aA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
+                let val = (aI/aS)*100; antInRange = val>=75.7 && val<=78.7;
+                aE.textContent = val.toFixed(2)+'%'; aB.className = 'bolton-result-item '+(antInRange?'in-range':'out-range');
+                if(antInRange) { aA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
                 else { aA.innerHTML = '<strong style="color:var(--color-error)">⚠️ Exceso '+(val>78.7?'Mandibular':'Maxilar')+': '+Math.abs(val>78.7 ? aI-(aS*0.772) : aS-(aI/0.772)).toFixed(2)+' mm</strong>'; }
             } else { aE.textContent='-- %'; aA.innerHTML='Faltan incisivos/caninos.'; aB.className='bolton-result-item'; }
 
@@ -619,16 +703,41 @@
             if(aS>0 && aI>0 && mSD>0 && mSI>0 && mID>0 && mII>0){
                 let pS=0, pI=0; for(let i of [1,2,9,10]){ pS+=parseFloat(document.getElementById('tooth-sup-'+i).value)||0; pI+=parseFloat(document.getElementById('tooth-inf-'+i).value)||0; }
                 let totS = aS+pS+mSD+mSI, totI = aI+pI+mID+mII;
-                let val = (totI/totS)*100, ok = val>=89.4 && val<=93.2;
-                tE.textContent = val.toFixed(2)+'%'; tB.className = 'bolton-result-item '+(ok?'in-range':'out-range');
-                if(ok) { tA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
+                let val = (totI/totS)*100; totInRange = val>=89.4 && val<=93.2;
+                tE.textContent = val.toFixed(2)+'%'; tB.className = 'bolton-result-item '+(totInRange?'in-range':'out-range');
+                if(totInRange) { tA.innerHTML = '<strong style="color:var(--color-success)">✓ Ideal</strong>'; }
                 else { tA.innerHTML = '<strong style="color:var(--color-error)">⚠️ Exceso '+(val>93.2?'Mandibular':'Maxilar')+': '+Math.abs(val>93.2 ? totI-(totS*0.913) : totS-(totI/0.913)).toFixed(2)+' mm</strong>'; }
-            } else { tE.textContent='-- %'; tA.innerHTML='Faltan molares/premolares.'; tB.className='bolton-result-item'; }
+                
+                generateBoltonSummary(antInRange, totInRange);
+            } else { 
+                tE.textContent='-- %'; tA.innerHTML='Faltan molares/premolares.'; tB.className='bolton-result-item'; 
+                document.getElementById('bolton-clinical-summary').style.display = 'none';
+            }
         }
 
-        function clearAllData() { if(confirm('¿Limpiar pantalla?')) { currentPatientId=null; document.querySelectorAll('input').forEach(i=>i.value=''); calculatePermanent(); } }
+        // FUNCIÓN RESTAURADA: Resumen Visual de Bolton
+        function generateBoltonSummary(antInRange, totInRange) {
+            const sumBox = document.getElementById('bolton-clinical-summary');
+            const sumText = document.getElementById('bolton-summary-text');
+            if(!sumBox || !sumText) return;
+
+            if (antInRange && totInRange) {
+                sumText.innerHTML = '<b>Ideal:</b> Relación de tamaño dental adecuada en ambas arcadas.';
+            } else if (!antInRange && !totInRange) {
+                sumText.innerHTML = '<b>Alerta:</b> Discrepancia generalizada. Evaluar desgastes (stripping), extracciones o adiciones (resinas/carillas) en la arcada deficiente.';
+            } else if (!antInRange && totInRange) {
+                sumText.innerHTML = '<b>Sector Anterior:</b> Problema localizado en incisivos/caninos. Considerar stripping anterior en la arcada con exceso o restauración estética en la antagonista.';
+            } else {
+                sumText.innerHTML = '<b>Sector Posterior:</b> Problema localizado en premolares/molares. Sector anterior conservado. Considerar desgaste posterior o asimetrías de extracciones.';
+            }
+            sumBox.style.display = 'block';
+        }
+
         function loadPermanentExample() {
-            document.getElementById('patient-name').value="Ejemplo";
+            // Asegurarse de que al cargar el ejemplo generamos una ficha nueva
+            currentPatientId = null; 
+            document.getElementById('patient-name').value="Paciente de Prueba";
+            document.getElementById('patient-age').value="24";
             let vS=[7, 7.2, 7.8, 6.5, 8.5, 8.5, 6.5, 7.8, 7.2, 7], vI=[6.8, 7, 6.5, 5.8, 5.2, 5.2, 5.8, 6.5, 7, 6.8];
             for(let i=1;i<=10;i++){ document.getElementById('tooth-sup-'+i).value=vS[i-1]; document.getElementById('tooth-inf-'+i).value=vI[i-1]; }
             document.getElementById('perm-espacio-sup').value='74'; document.getElementById('perm-espacio-inf').value='64';
